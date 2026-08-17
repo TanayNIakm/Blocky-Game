@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blocky Jump</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #ffeded;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            flex-direction: column;
+        }
+
+        #score-board {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #ff0000;
+            display: flex;
+            justify-content: space-between;
+            width: 600px;
+            align-items: center;
+        }
+              #game {
+            width: 600px;
+            height: 200px;
+            border-bottom: 2px solid #6ee67e;
+            position: relative;
+            overflow: hidden;
+            background-color: white;
+            box-shadow: 0 4px 10px rgba(255, 0, 0, 0.1);
+        }
+        #main-menu {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        #main-menu h1 {
+            color: #000000;
+            margin-bottom: 20px;
+            margin-top: 0;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            background-color: #73ff00;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #333;
+        }
+
+        #stop-btn {
+            display: none; 
+            background-color: #ff0000;
+        }
+
+        #stop-btn:hover {
+            background-color: #360101;
+        }
+
+        #dino {
+            width: 40px;
+            height: 40px;
+            background-color: #2a7200;
+            position: absolute;
+            top: 160px;
+            left: 50px;
+            border-radius: 5px;
+        }
+
+        #cactus {
+            width: 20px;
+            height: 40px;
+            background-color: #00ff37;
+            position: absolute;
+            top: 160px;
+            left: 600px;
+        }
+
+       
+        .jump {
+            animation: jumpAnim 0.5s linear;
+        }
+
+        
+        .moving {
+            animation: block 1.5s infinite linear;
+        }
+
+        @keyframes jumpAnim {
+            0% { top: 160px; }
+            40% { top: 60px; }
+            50% { top: 60px; }
+            60% { top: 60px; }
+            100% { top: 160px; }
+        }
+
+        @keyframes block {
+            0% { left: 600px; }
+            100% { left: -20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="score-board">
+        <div>Your Score(btw its too Low XO): <span id="scoreSpan">0</span></div>
+        <button id="stop-btn">Quit</button>
+    </div>
+    
+    <div id="game">
+        
+        <div id="main-menu">
+            <h1>Blocky Jump</h1>
+            <button id="start-btn">Enter The Game</button>
+        </div>
+
+        <div id="dino"></div>
+        <div id="cactus"></div>
+    </div>
+
+    <p style="margin-top: 20px; color: #00ff0d;">Press <b>Spacebar</b> or <b>Click the game area</b> to jump!</p>
+
+    <script>
+        const dino = document.getElementById("dino");
+        const cactus = document.getElementById("cactus");
+        const scoreSpan = document.getElementById("scoreSpan");
+        const mainMenu = document.getElementById("main-menu");
+        const startBtn = document.getElementById("start-btn");
+        const stopBtn = document.getElementById("stop-btn");
+        const gameContainer = document.getElementById("game");
+        
+        let score = 0;
+        let isPlaying = false;
+
+        
+        function startGame() {
+            isPlaying = true;
+            score = 0;
+            scoreSpan.innerHTML = "0";
+            
+            
+            mainMenu.style.display = "none";
+            stopBtn.style.display = "block";
+
+            
+            cactus.classList.remove("moving");
+            void cactus.offsetWidth; 
+            cactus.classList.add("moving");
+            cactus.style.animationPlayState = "running";
+        }
+
+       
+        function stopGame() {
+            isPlaying = false;
+            
+           
+            mainMenu.style.display = "flex";
+            stopBtn.style.display = "none";
+
+           
+            cactus.style.animationPlayState = "paused";
+            dino.classList.remove("jump");
+        }
+
+        
+        function jump() {
+            if (isPlaying && dino.classList != "jump") {
+                dino.classList.add("jump");
+                
+                setTimeout(function() {
+                    dino.classList.remove("jump");
+                }, 500);
+            }
+        }
+
+        let checkAlive = setInterval(function() {
+            if (!isPlaying) return; 
+            
+            let dinoTop = parseInt(window.getComputedStyle(dino).getPropertyValue("top"));
+            
+           
+            let cactusLeft = parseInt(window.getComputedStyle(cactus).getPropertyValue("left"));
+
+           
+            if (cactusLeft > 0 && cactusLeft < 90 && dinoTop >= 120) {
+                
+                alert("Bro You Just Hit The Cactus XO! Your final score: " + Math.floor(score / 100));
+                stopGame();
+            } else {
+               
+                score++;
+                scoreSpan.innerHTML = Math.floor(score / 100);
+            }
+        }, 10);
+
+       
+        startBtn.addEventListener("click", startGame);
+        stopBtn.addEventListener("click", stopGame);
+
+        
+        document.addEventListener("keydown", function(event) {
+            if (event.code === "Space") {
+                
+                event.preventDefault(); 
+                
+                if (!isPlaying) {
+                    startGame(); 
+                } else {
+                    jump(); 
+                }
+            }
+        });
+
+        gameContainer.addEventListener("mousedown", function() {
+            jump();
+        });
+    </script>
+
+</body>
+</html>
+
+  
